@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6bdd732022168c346b9f1e951f9de2db
+timeCreated: 1447349868
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Scenes/Demo.unity
+  uploadId: 91466

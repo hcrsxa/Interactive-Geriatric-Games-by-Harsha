@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 53b3960ee3d3d4a5caa8d5473d120187
+ShaderImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Standard Assets/Effects/ImageEffects/Shaders/_BloomAndFlares/Blend.shader
+  uploadId: 91466

@@ -1,0 +1,24 @@
+{
+    "name": "EnoxSoftware.OpenCVForUnity.Editor.Json",
+    "rootNamespace": "",
+    "references": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "OPENCV_NEWTONSOFT_JSON_AVAILABLE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "",
+            "define": "OPENCV_NEWTONSOFT_JSON_AVAILABLE"
+        }
+    ],
+    "noEngineReferences": false
+}

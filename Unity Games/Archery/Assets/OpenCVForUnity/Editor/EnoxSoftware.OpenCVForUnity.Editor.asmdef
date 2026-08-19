@@ -1,0 +1,19 @@
+{
+  "name": "EnoxSoftware.OpenCVForUnity.Editor",
+  "rootNamespace": "",
+  "references": [
+    "GUID:cef0e9dabbfe59a4790acbf31c21f33e",
+    "UnityEditor.PackageManager"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,0 +1,105 @@
+#include <M5StickC.h>    
+#include "BluetoothSerial.h"
+#include "HX711.h"
+
+// Hardware Pin Definitions
+const int LOADCELL_DOUT_PIN = 26; 
+const int LOADCELL_SCK_PIN  = 0;  
+
+HX711 scale;
+BluetoothSerial SerialBT;
+
+bool wasConnected = false;
+
+// Helper function to format large numbers for the small OLED display
+String formatAbbreviatedValue(long value) {
+  long absVal = abs(value);
+  
+  if (absVal >= 1000000) {
+    return String(value / 1000000.0f, 1) + "M";
+  } 
+  else if (absVal >= 1000) {
+    // Displays up to 1 decimal place (e.g., 30.5k, 80k)
+    float kValue = value / 1000.0f;
+    if (fmod(kValue, 1.0f) == 0) {
+      return String((int)kValue) + "k"; // Clean whole k (e.g. 30k, 80k)
+    } else {
+      return String(kValue, 1) + "k";    // Fractional k (e.g. 30.5k)
+    }
+  } 
+  else {
+    return String(value);
+  }
+}
+
+void setup() {
+  M5.begin();
+  
+  // Power management fix: Ensure stable voltage for Bluetooth RF spikes
+  M5.Axp.EnableCoulombcounter(); 
+  
+  // Initialize ESP32 Bluetooth Classic SPP
+  SerialBT.begin("M5Stick_Archery");
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("BT STANDBY");
+
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.tare(); 
+}
+
+void loop() {
+  M5.update();
+
+  if (SerialBT.hasClient()) {
+    
+    if (!wasConnected) {
+      wasConnected = true;
+      M5.Lcd.fillScreen(GREEN);
+      M5.Lcd.setTextColor(BLACK);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("BT CONNECTED!");
+      delay(500);
+    }
+
+    if (scale.is_ready()) {
+      long rawForce = scale.get_units(1);
+      
+      // 1. TELEMETRY TO UNITY: Keep sending pure raw numbers!
+      SerialBT.println("FORCE:" + String(rawForce));
+
+      // 2. M5STICK DISPLAY ONLY: Convert to human-readable string (e.g. 30k)
+      String displayFormattedStr = formatAbbreviatedValue(rawForce);
+
+      M5.Lcd.fillScreen(BLACK);
+      M5.Lcd.setTextColor(YELLOW);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.printf("LIVE PULL:\n%s", displayFormattedStr.c_str());
+    } else {
+      SerialBT.println("FORCE:0");
+    }
+  } 
+  else {
+    if (wasConnected) {
+      wasConnected = false;
+      M5.Lcd.fillScreen(RED);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("DISCONNECTED");
+      delay(1000);
+    }
+
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.println("WAITING FOR\nUNITY...");
+  }
+
+  delay(30); // ~33Hz telemetry rate
+}

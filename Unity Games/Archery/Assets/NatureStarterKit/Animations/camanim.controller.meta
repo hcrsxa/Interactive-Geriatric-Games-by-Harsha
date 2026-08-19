@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a2f6abce8d4e3e345a721d2ad2e5ed4e
+timeCreated: 1447087285
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Animations/camanim.controller
+  uploadId: 91466

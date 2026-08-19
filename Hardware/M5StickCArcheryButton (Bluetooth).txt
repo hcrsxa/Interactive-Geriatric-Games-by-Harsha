@@ -1,0 +1,43 @@
+#include <M5StickC.h>    
+#include "BluetoothSerial.h" // Standard ESP32 Bluetooth Classic SPP Library
+
+BluetoothSerial SerialBT;
+
+void setup() {
+  M5.begin();
+  
+  // Start Bluetooth Serial broadcast with the name "M5Stick_Archery"
+  SerialBT.begin("M5Stick_Archery"); 
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(10, 10);
+  M5.Lcd.println("BT READY!");
+}
+
+void loop() {
+  M5.update(); // Keep button state updated
+
+  // Transmit DRAW signal over Bluetooth while BtnA is held down
+  if (M5.BtnA.isPressed()) {
+    SerialBT.println("DRAW");
+    
+    M5.Lcd.fillScreen(RED);
+    M5.Lcd.setCursor(10, 10);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.println("DRAWING...");
+  } 
+  // Transmit RELEASE signal the moment BtnA is let go
+  else if (M5.BtnA.wasReleased()) {
+    SerialBT.println("RELEASE");
+    
+    M5.Lcd.fillScreen(GREEN);
+    M5.Lcd.setCursor(10, 10);
+    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.println("RELEASED!");
+  }
+
+  delay(20); // ~50Hz refresh rate
+}

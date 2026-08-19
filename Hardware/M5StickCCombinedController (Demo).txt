@@ -1,0 +1,150 @@
+#include <M5StickC.h>
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
+
+// Game mode state definition
+enum GameMode {
+  MODE_CRAZY_DRIVER = 0,
+  MODE_SPACESHIP    = 1
+};
+
+GameMode currentMode = MODE_CRAZY_DRIVER;
+
+// Long-press timing variables (non-blocking)
+unsigned long btnPressStartTime = 0;
+bool isPressing = false;
+const unsigned long LONG_PRESS_DURATION = 4000; // 4000 ms = 4 seconds
+
+bool wasConnected = false;
+
+// Variables to hold IMU data
+float accX = 0.0F;
+float accY = 0.0F;
+float accZ = 0.0F;
+
+// Redraw standby screen with large game title
+void drawStandbyScreen() {
+  M5.Lcd.fillScreen(BLACK);
+  
+  // Header tag
+  M5.Lcd.setTextSize(1);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("[STANDBY]");
+
+  // Large, high-contrast game mode title for visual accessibility
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(CYAN);
+  M5.Lcd.setCursor(5, 25);
+  if (currentMode == MODE_CRAZY_DRIVER) {
+    M5.Lcd.println("CRAZY DRIVER");
+  } else {
+    M5.Lcd.println("SPACESHIP");
+  }
+}
+
+void setup() {
+  M5.begin();
+  
+  // Power management configuration for stable Bluetooth operation
+  M5.Axp.EnableCoulombcounter(); 
+  
+  M5.Imu.Init();
+  
+  // Initialize ESP32 Bluetooth Classic SPP under a single device name
+  SerialBT.begin("M5RehabController");
+
+  M5.Lcd.setRotation(3);
+  drawStandbyScreen();
+}
+
+void loop() {
+  M5.update(); // Update button states
+
+  // -------------------------------------------------------------
+  // 1. MODE TOGGLE (4-Second Long Press on M5 Main BtnA)
+  // -------------------------------------------------------------
+  if (M5.BtnA.isPressed()) {
+    if (!isPressing) {
+      isPressing = true;
+      btnPressStartTime = millis();
+    } else {
+      if (millis() - btnPressStartTime >= LONG_PRESS_DURATION) {
+        // Toggle active mode
+        currentMode = (currentMode == MODE_CRAZY_DRIVER) ? MODE_SPACESHIP : MODE_CRAZY_DRIVER;
+
+        // Visual confirmation flash on screen
+        M5.Lcd.fillScreen(BLUE);
+        M5.Lcd.setTextColor(WHITE);
+        M5.Lcd.setTextSize(2);
+        M5.Lcd.setCursor(5, 5);
+        if (currentMode == MODE_CRAZY_DRIVER) {
+          M5.Lcd.println("MODE SWITCH:\nCRAZY DRIVER");
+        } else {
+          M5.Lcd.println("MODE SWITCH:\nSPACESHIP");
+        }
+        
+        delay(1000); 
+        btnPressStartTime = millis(); // Reset timer
+        if (!SerialBT.hasClient()) {
+          drawStandbyScreen();
+        }
+      }
+    }
+  } else {
+    isPressing = false;
+  }
+
+  // -------------------------------------------------------------
+  // 2. BLUETOOTH & TELEMETRY LOGIC
+  // -------------------------------------------------------------
+  if (SerialBT.hasClient()) {
+    
+    if (!wasConnected) {
+      wasConnected = true;
+      M5.Lcd.fillScreen(GREEN);
+      M5.Lcd.setTextColor(BLACK);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("BT CONNECTED!");
+      delay(500);
+    }
+
+    // Read IMU accelerometer data
+    M5.Imu.getAccelData(&accX, &accY, &accZ);
+    int btnState = M5.BtnA.isPressed() ? 1 : 0;
+
+    // Send telemetry to Unity ("accX,btnState")
+    SerialBT.print(accX);
+    SerialBT.print(",");
+    SerialBT.println(btnState);
+
+    // Update screen feedback based on current mode
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(YELLOW);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+
+    if (currentMode == MODE_CRAZY_DRIVER) {
+      M5.Lcd.printf("STEER: %.2f\nBTN: %d", accX, btnState);
+    } else {
+      M5.Lcd.printf("TILT: %.2f\nFIRE: %d", accX, btnState);
+    }
+    
+  } 
+  else {
+    if (wasConnected) {
+      wasConnected = false;
+      M5.Lcd.fillScreen(RED);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.setTextSize(2);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("DISCONNECTED");
+      delay(1000);
+      drawStandbyScreen();
+    }
+  }
+
+  delay(30); // ~33Hz telemetry streaming rate
+}

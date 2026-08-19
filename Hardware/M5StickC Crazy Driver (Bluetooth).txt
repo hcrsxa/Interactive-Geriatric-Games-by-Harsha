@@ -1,0 +1,83 @@
+#include <M5StickC.h>     
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
+
+bool wasConnected = false;
+
+// Variables to hold IMU data
+float accX = 0.0F;
+float accY = 0.0F;
+float accZ = 0.0F;
+
+void setup() {
+  M5.begin();
+  
+  // Power management configuration for stable Bluetooth operation
+  M5.Axp.EnableCoulombcounter(); 
+  
+  M5.Imu.Init();
+  
+  // Initialize ESP32 Bluetooth Classic SPP for Crazy Driver
+  SerialBT.begin("M5CrazyDriver");
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("BT STANDBY");
+}
+
+void loop() {
+  M5.update(); // Update button states
+
+  if (SerialBT.hasClient()) {
+    
+    if (!wasConnected) {
+      wasConnected = true;
+      M5.Lcd.fillScreen(GREEN);
+      M5.Lcd.setTextColor(BLACK);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("BT CONNECTED!");
+      delay(500);
+    }
+
+    // 1. Read IMU acceleration data (accX for wrist tilt)
+    M5.Imu.getAccelData(&accX, &accY, &accZ);
+
+    // 2. Read M5 button state
+    int btnState = M5.BtnA.isPressed() ? 1 : 0;
+    
+    // 3. TELEMETRY STREAM TO UNITY: Send "Tilt,Button" format (e.g., -0.45,0)
+    SerialBT.print(accX);
+    SerialBT.print(",");
+    SerialBT.println(btnState);
+
+    // 4. M5STICK SCREEN DISPLAY: Shows live tilt telemetry and button state
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(YELLOW);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.printf("STEER: %.2f\nBTN: %d", accX, btnState);
+    
+  } 
+  else {
+    if (wasConnected) {
+      wasConnected = false;
+      M5.Lcd.fillScreen(RED);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("DISCONNECTED");
+      delay(1000);
+    }
+
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.println("WAITING FOR\nUNITY...");
+  }
+
+  delay(30); // ~33Hz telemetry refresh rate
+}

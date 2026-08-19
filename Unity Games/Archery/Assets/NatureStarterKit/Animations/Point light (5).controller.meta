@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 86011f043dc32c0488d02b81807e68ec
+timeCreated: 1447404991
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Animations/Point light (5).controller
+  uploadId: 91466

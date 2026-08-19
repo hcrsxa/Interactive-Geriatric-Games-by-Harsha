@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: eb4d7bfd78d32384eae55114b1dd0cbd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 21088
+  packageName: OpenCV for Unity
+  packageVersion: 3.0.3
+  assetPath: Assets/OpenCVForUnity/org/opencv/unity/Worker/Dnn/MediaPipe/MediaPipeFaceLandmarker.cs
+  uploadId: 929448

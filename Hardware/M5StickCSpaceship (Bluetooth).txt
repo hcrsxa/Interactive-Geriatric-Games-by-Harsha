@@ -1,0 +1,83 @@
+#include <M5StickC.h>    
+#include "BluetoothSerial.h"
+
+BluetoothSerial SerialBT;
+
+bool wasConnected = false;
+
+// Variables to hold IMU data
+float accX = 0.0F;
+float accY = 0.0F;
+float accZ = 0.0F;
+
+void setup() {
+  M5.begin();
+  
+  // Power management fix from your archery game for stable Bluetooth
+  M5.Axp.EnableCoulombcounter(); 
+  
+  M5.Imu.Init();
+  
+  // Initialize ESP32 Bluetooth Classic SPP
+  SerialBT.begin("M5Spaceship");
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("BT STANDBY");
+}
+
+void loop() {
+  M5.update(); // Update button states
+
+  if (SerialBT.hasClient()) {
+    
+    if (!wasConnected) {
+      wasConnected = true;
+      M5.Lcd.fillScreen(GREEN);
+      M5.Lcd.setTextColor(BLACK);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("BT CONNECTED!");
+      delay(500);
+    }
+
+    // 1. Get IMU data (using accX for Left/Right tilt)
+    M5.Imu.getAccelData(&accX, &accY, &accZ);
+
+    // 2. Get the main "M5" Button state (1 if pressed, 0 if not)
+    int btnState = M5.BtnA.isPressed() ? 1 : 0;
+    
+    // 3. TELEMETRY TO UNITY: Send format "Tilt,Button" (e.g., -0.45,1)
+    SerialBT.print(accX);
+    SerialBT.print(",");
+    SerialBT.println(btnState);
+
+    // 4. M5STICK DISPLAY ONLY: Show live tilt and button data
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(YELLOW);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.printf("TILT: %.2f\nFIRE: %d", accX, btnState);
+    
+  } 
+  else {
+    if (wasConnected) {
+      wasConnected = false;
+      M5.Lcd.fillScreen(RED);
+      M5.Lcd.setTextColor(WHITE);
+      M5.Lcd.setCursor(5, 5);
+      M5.Lcd.println("DISCONNECTED");
+      delay(1000);
+    }
+
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.println("WAITING FOR\nUNITY...");
+  }
+
+  delay(30); // ~33Hz telemetry rate
+}

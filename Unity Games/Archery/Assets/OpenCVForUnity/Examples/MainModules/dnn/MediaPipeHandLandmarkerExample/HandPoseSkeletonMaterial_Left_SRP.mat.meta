@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: fbf9bc034cb0f004c9911012a5d10dcd
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 21088
+  packageName: OpenCV for Unity
+  packageVersion: 3.0.3
+  assetPath: Assets/OpenCVForUnity/Examples/MainModules/dnn/MediaPipeHandLandmarkerExample/HandPoseSkeletonMaterial_Left_SRP.mat
+  uploadId: 929448

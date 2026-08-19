@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 14768d3865b1342e3a861fbe19ba2db2
+ShaderImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Standard Assets/Effects/ImageEffects/Shaders/ConvertDepth.shader
+  uploadId: 91466

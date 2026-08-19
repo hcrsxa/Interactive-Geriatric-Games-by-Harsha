@@ -1,0 +1,57 @@
+#include <M5StickC.h> // Change to <M5StickC.h> if using original orange M5StickC
+#include "HX711.h"
+
+// Hardware Pin Definitions for HX711
+const int LOADCELL_DOUT_PIN = 26; // M5StickC GPIO Pin for DT (Data)
+const int LOADCELL_SCK_PIN  = 0;  // M5StickC GPIO Pin for SCK (Clock)
+
+HX711 scale;
+
+void setup() {
+  M5.begin();
+  
+  // Standard USB Serial communication at 115200 baud
+  Serial.begin(115200);
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("5KG HX711 Init");
+
+  // Initialize HX711 ADC sensor
+  scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+
+  // Tare Calibration: Zero out resting weight of handle/frame on boot
+  scale.tare(); 
+
+  M5.Lcd.fillScreen(GREEN);
+  M5.Lcd.setTextColor(BLACK);
+  M5.Lcd.setCursor(5, 5);
+  M5.Lcd.println("READY & TARED!");
+}
+
+void loop() {
+  M5.update(); // Maintain hardware button/screen state
+
+  if (scale.is_ready()) {
+    // Read raw 24-bit ADC value from 5kg load cell
+    long rawForce = scale.get_units(1);
+
+    // Transmit telemetry payload down USB cable to Unity
+    Serial.print("FORCE:");
+    Serial.println(rawForce);
+
+    // On-screen debugging output
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.setCursor(5, 5);
+    M5.Lcd.printf("5KG FORCE:\n%ld", rawForce);
+  } else {
+    // Fail-safe payload if hardware disconnects temporarily
+    Serial.println("FORCE:0");
+  }
+
+  delay(30); // ~33Hz sampling rate for responsive physical therapy tracking
+}

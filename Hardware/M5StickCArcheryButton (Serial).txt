@@ -1,0 +1,40 @@
+#include <M5StickC.h>
+
+void setup() {
+  M5.begin();
+  
+  // Start standard USB Serial communication at 115200 baud
+  Serial.begin(115200);
+
+  M5.Lcd.setRotation(3);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setCursor(10, 10);
+  M5.Lcd.println("USB READY!");
+}
+
+void loop() {
+  M5.update(); // Poll hardware button states
+
+  // Transmit DRAW signal over USB Serial while BtnA is held down
+  if (M5.BtnA.isPressed()) {
+    Serial.println("DRAW");
+    
+    M5.Lcd.fillScreen(RED);
+    M5.Lcd.setCursor(10, 10);
+    M5.Lcd.setTextColor(WHITE);
+    M5.Lcd.println("DRAWING...");
+  } 
+  // Transmit RELEASE signal the moment BtnA is let go
+  else if (M5.BtnA.wasReleased()) {
+    Serial.println("RELEASE");
+    
+    M5.Lcd.fillScreen(GREEN);
+    M5.Lcd.setCursor(10, 10);
+    M5.Lcd.setTextColor(BLACK);
+    M5.Lcd.println("RELEASED!");
+  }
+
+  delay(20); // ~50Hz refresh rate for smooth wired transmission
+}

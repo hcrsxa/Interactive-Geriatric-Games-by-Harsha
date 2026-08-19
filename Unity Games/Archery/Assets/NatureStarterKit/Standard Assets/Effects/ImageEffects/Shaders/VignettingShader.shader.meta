@@ -1,0 +1,11 @@
+fileFormatVersion: 2
+guid: 627943dc7a9a74286b70a4f694a0acd5
+ShaderImporter:
+  userData: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 49962
+  packageName: Nature Starter Kit
+  packageVersion: 1.0
+  assetPath: Assets/NatureStarterKit/Standard Assets/Effects/ImageEffects/Shaders/VignettingShader.shader
+  uploadId: 91466
